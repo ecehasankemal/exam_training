@@ -18,30 +18,23 @@ int
     return (0);
 }
 
-int exec(char **argv, char **envp, int i) 
+int exec(char **argv, char **envp, int i)
 {
     int fd[2];
     int status;
     int has_pipe = argv[i] && !strcmp(argv[i], "|");
-
     if (has_pipe && pipe(fd) == -1)
         return err("error: fatal\n");
-
     int pid = fork();
-    if (!pid) 
+    if (!pid)
     {
         argv[i] = 0;
-        if (has_pipe && (dup2(fd[1], 1) == -1 || close(fd[0]) == -1 || close(fd[1]) == -1))
-            return err("error: fatal\n");
+        dup2(fd[1], 1); close(fd[0]); close(fd[1]);
         execve(*argv, argv, envp);
         return err("error: cannot execute "), err(*argv), err("\n");
     }
-
     waitpid(pid, &status, 0);
-
-    if (has_pipe && (dup2(fd[0], 0) == -1 || close(fd[0]) == -1 || close(fd[1]) == -1))
-        return err("error: fatal\n");
-
+    dup2(fd[0], 0); close(fd[0]); close(fd[1]);
     return 0;
 }
 
