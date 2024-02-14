@@ -35,17 +35,15 @@ int exec(char **argv, char **envp, int i)
     }
     waitpid(pid, &status, 0);
     dup2(fd[0], 0); close(fd[0]); close(fd[1]);
-    return 0;
+    return status;
 }
 
 int
     main(int argc, char **argv, char **envp)
 {
-    int status;
-    int i;
+    int status = 0;
+    int i = 0;
 
-    status = 0;
-    i = 0;
     if (argc > 1)
     {
         while (argv[i] && argv[++i])
